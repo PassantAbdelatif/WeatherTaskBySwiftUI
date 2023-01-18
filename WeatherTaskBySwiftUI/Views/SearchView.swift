@@ -6,14 +6,20 @@
 //
 
 import SwiftUI
-
+enum AutoCompleteViewCases: Int {
+    case noResultsWithNotch = 120
+    case noResultsWithoutNotch = 104
+    case hasResults = 300
+}
 
 struct SearchView: View {
     
     @ObservedObject var viewModel: SearchViewModel
     @Binding var searchViewState: SearchViewState
     @State var searchKeyWord: String = ""
-    @State var selectedWeather: WeatherAutoCompleteSearchResponse?
+    @Binding var selectedWeather: WeatherAutoCompleteSearchResponse?
+    
+    @State var autoCompleteViewCase: AutoCompleteViewCases = .noResultsWithoutNotch
     
     var body: some View {
         
@@ -40,27 +46,43 @@ struct SearchView: View {
                 .padding()
                 
             }.padding(.top, UIDevice.current.hasNotch ? 40 : 25)
-            List(viewModel.weatherForecastSearchResults ?? [],
-                 id: \.self,
-                 selection: $selectedWeather) { dataType in
-                AutoCompleteSearchCell(weatherAutoComplete: dataType)
-                    .listRowSeparator(.hidden)
+            
+            List{
                 
-            }
-                 .hidden(!viewModel.showAutoCompleteView)
-                 .listStyle(.grouped)
-                 .background(.white)
-                 .onAppear {
-                     let tableHeaderView = UIView(frame: .zero)
-                     tableHeaderView.frame.size.height = 1
-                     UITableView.appearance().tableHeaderView = tableHeaderView
-                 }
-
+                if let weatherForecastSearchResults = viewModel.weatherForecastSearchResults,
+                   !weatherForecastSearchResults.isEmpty {
+                    ForEach(0..<weatherForecastSearchResults.count) { index in
+                        if index < weatherForecastSearchResults.count {
+                            if let weatherForecastSearchResult = weatherForecastSearchResults[index]  {
+                                AutoCompleteSearchCell(weatherAutoComplete: weatherForecastSearchResult)
+                                    .listRowSeparator(.hidden)
+                                    .onTapGesture {
+                                        self.searchViewState = .isClosed
+                                        self.selectedWeather = weatherForecastSearchResult
+                                        
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                
+            } .hidden(!viewModel.showAutoCompleteView)
+                .listStyle(.grouped)
+                .background(.white)
+                .onAppear {
+                    let tableHeaderView = UIView(frame: .zero)
+                    tableHeaderView.frame.size.height = 1
+                    UITableView.appearance().tableHeaderView = tableHeaderView
+                }
+    
+           
         }
         .frame(maxWidth: .infinity,
                maxHeight: viewModel.showAutoCompleteView ? 300 :  UIDevice.current.hasNotch ? 120 : 104)
         .background(.white)
-        .cornerRadius(30, corners: [.bottomLeft, .bottomRight]) //
+        .cornerRadius(30, corners: [.bottomLeft, .bottomRight])
+        
     }
     func closeSearchView() {
         searchViewState = .isClosed

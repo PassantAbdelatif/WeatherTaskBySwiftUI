@@ -25,7 +25,7 @@ struct WeatherAutoCompleteSearchResponse: Codable, Identifiable, Hashable {
   var lat: Float?
   var region: String?
   var name: String?
-  var id: Int 
+    let id = UUID()
 
 
 }

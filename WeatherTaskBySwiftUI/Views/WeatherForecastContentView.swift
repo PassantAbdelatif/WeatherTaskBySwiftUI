@@ -16,10 +16,12 @@ struct WeatherForecastContentView: View {
     
     @ObservedObject var viewModel: MainWeatherViewModel
     @State var searchViewState: SearchViewState = .isClosed
+    @State var selectedWeather: WeatherAutoCompleteSearchResponse?
     
     var body: some View {
         
         let state = viewModel.state
+        
         
         switch state {
         case .idle:
@@ -114,12 +116,16 @@ struct WeatherForecastContentView: View {
                 }
                 VStack {
                     SearchView(viewModel: SearchViewModel(),
-                               searchViewState: $searchViewState)
+                               searchViewState: $searchViewState,
+                               selectedWeather: $selectedWeather)
                     .hidden(searchViewState == .isClosed ? true : false)
                     .frame( alignment: .top)
                     Spacer()
                 }
                 .padding([ .top], UIDevice.current.hasNotch ? 0 : 65)
+            }.onChange(of: selectedWeather) { newValue in
+                viewModel.city = (newValue?.name).orEmpty
+                viewModel.getCurrentWeatherForecast()
             }
         case .failed(let errorViewModel):
             Color.clear.alert(isPresented: $viewModel.showErrorAlert) {
