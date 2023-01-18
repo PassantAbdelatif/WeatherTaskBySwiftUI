@@ -13,6 +13,7 @@ struct AssetNames {
     struct Arrow {
         static let arrowUp = "ic_arrow_up"
         static let arrowDown = "ic_arrow_down"
+        static let arrowLeft = "ic_arrow_left"
     }
     struct Background {
         static let splashBackgroundImage = "splash_image"

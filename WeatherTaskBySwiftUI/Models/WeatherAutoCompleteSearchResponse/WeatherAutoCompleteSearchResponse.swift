@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct WeatherAutoCompleteSearchResponse: Codable {
+struct WeatherAutoCompleteSearchResponse: Codable, Identifiable, Hashable {
 
   enum CodingKeys: String, CodingKey {
     case country
@@ -25,7 +25,7 @@ struct WeatherAutoCompleteSearchResponse: Codable {
   var lat: Float?
   var region: String?
   var name: String?
-  var id: Int?
+  var id: Int 
 
 
 }

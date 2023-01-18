@@ -34,12 +34,13 @@ struct MediumTextLabel: View {
     
     var mediumText: String
     var mediumSize: Int
+    var textColor: Color = .white
     
     var body: some View {
         Text(mediumText)
             .font(.custom(FontNames.SFPO.SFPOMedium,
                           size: CGFloat(mediumSize)))
-            .foregroundColor(.white)
+            .foregroundColor(textColor)
             .frame(alignment: .center)
     }
 }
@@ -48,12 +49,13 @@ struct BoldTextLabel: View {
     
     var boldText: String
     var boldSize: Int
+    var textColor: Color = .white
     
     var body: some View {
         Text(boldText)
             .font(.custom(FontNames.SFPO.SFPOBold,
                           size: CGFloat(boldSize)))
-            .foregroundColor(.white)
+            .foregroundColor(textColor)
             .frame(alignment: .center)
     }
 }

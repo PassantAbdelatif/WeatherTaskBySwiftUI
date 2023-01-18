@@ -7,8 +7,15 @@
 
 import SwiftUI
 
+enum SearchViewState {
+    case isOpened
+    case isClosed
+}
+
 struct WeatherForecastContentView: View {
+    
     @ObservedObject var viewModel: MainWeatherViewModel
+    @State var searchViewState: SearchViewState = .isClosed
     
     var body: some View {
         
@@ -20,10 +27,10 @@ struct WeatherForecastContentView: View {
         case .loading:
             ProgressView()
         case .success:
-            ZStack {
+            ZStack (alignment: .top){
                 fullBackground(imageName: AssetNames.Background.splashBackgroundImage)
                 fullBackground(imageName: AssetNames.Background.gradientBackgroundImage)
-                
+          
                 VStack {
                     ZStack{
                         
@@ -35,7 +42,7 @@ struct WeatherForecastContentView: View {
                         HStack{
                             Spacer()
                             Button(action: {
-                                executeSearch()
+                                openSearchView()
                             }) {
                                 Image(AssetNames.SearchView.searchIcon)
                                     .renderingMode(.original)
@@ -105,6 +112,14 @@ struct WeatherForecastContentView: View {
                     //.padding([ .bottom], 50)
                     Spacer()
                 }
+                VStack {
+                    SearchView(viewModel: SearchViewModel(),
+                               searchViewState: $searchViewState)
+                    .hidden(searchViewState == .isClosed ? true : false)
+                    .frame( alignment: .top)
+                    Spacer()
+                }
+                .padding([ .top], UIDevice.current.hasNotch ? 0 : 65)
             }
         case .failed(let errorViewModel):
             Color.clear.alert(isPresented: $viewModel.showErrorAlert) {
@@ -116,10 +131,8 @@ struct WeatherForecastContentView: View {
             }
         }
     }
-    func executeSearch() {
-        print("Now search…")
-        viewModel.city = "cairo"
-        viewModel.getCurrentWeatherForecast()
+    func openSearchView() {
+        searchViewState = .isOpened
     }
 }
 

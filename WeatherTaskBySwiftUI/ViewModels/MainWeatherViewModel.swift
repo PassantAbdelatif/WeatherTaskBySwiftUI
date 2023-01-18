@@ -9,7 +9,6 @@ import Foundation
 import Combine
 import Moya
 import SwiftUI
-import CoreLocation
 
 class MainWeatherViewModel: ObservableObject {
     
@@ -20,7 +19,6 @@ class MainWeatherViewModel: ObservableObject {
     @Published private(set) var fridayWeatherForecast: Forecastday?
     @Published var city = "Alexandria"
     
-    private let locationManager = CLLocationManager()
     private var bindings = Set<AnyCancellable>()
     private let networkService: WeatherForecastServiceProtocol
     
