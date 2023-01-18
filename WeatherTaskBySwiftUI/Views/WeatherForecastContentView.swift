@@ -36,6 +36,7 @@ struct WeatherForecastContentView: View {
                 case .loading:
                     VStack{
                         Spacer()
+                        
                         ActivityIndicator()
                             .frame(width: 100, height: 100, alignment: .center)
                             .foregroundColor(.blue)
