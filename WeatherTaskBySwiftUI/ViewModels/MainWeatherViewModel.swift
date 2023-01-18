@@ -17,7 +17,6 @@ class MainWeatherViewModel: ObservableObject {
     @Published private(set) var todayWeatherForecast: Forecastday?
     @Published private(set) var tomorrowweatherForecast: Forecastday?
     @Published private(set) var fridayWeatherForecast: Forecastday?
-    @Published var city = "Alexandria"
     
     private var bindings = Set<AnyCancellable>()
     private let networkService: WeatherForecastServiceProtocol
@@ -29,8 +28,8 @@ class MainWeatherViewModel: ObservableObject {
         self.networkService = weatherForecastService
     }
     
-    func getCurrentWeatherForecast() {
-        fetchweatherForecast(with: self.city)
+    func getCurrentWeatherForecast(city: String) {
+        fetchweatherForecast(with: city)
     }
     
 }

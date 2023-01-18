@@ -22,18 +22,35 @@ struct WeatherForecastContentView: View {
         
         let state = viewModel.state
         
-        
-        switch state {
-        case .idle:
-            Color.clear.onAppear(perform: viewModel.getCurrentWeatherForecast)
-        case .loading:
-            ProgressView()
-        case .success:
-            ZStack (alignment: .top){
-                fullBackground(imageName: AssetNames.Background.splashBackgroundImage)
-                fullBackground(imageName: AssetNames.Background.gradientBackgroundImage)
-          
-                VStack {
+        ZStack (alignment: .top){
+            fullBackground(imageName: AssetNames.Background.splashBackgroundImage)
+            fullBackground(imageName: AssetNames.Background.gradientBackgroundImage)
+            
+            VStack {
+                
+                switch state {
+                case .idle:
+                    Color.clear.onAppear(perform: {
+                        viewModel.getCurrentWeatherForecast(city: "Alexandria")
+                    })
+                case .loading:
+                    VStack{
+                        Spacer()
+                        ActivityIndicator()
+                            .frame(width: 100, height: 100, alignment: .center)
+                            .foregroundColor(.blue)
+                        Spacer()
+                    }
+                case .failed(let errorViewModel):
+                    Color.clear.alert(isPresented: $viewModel.showErrorAlert) {
+                        Alert(
+                            title: Text("Error"),
+                            message: Text(errorViewModel.message),
+                            dismissButton: .default(Text("OK"))
+                        )
+                    }
+                case .success:
+                    
                     ZStack{
                         
                         HStack{
@@ -52,7 +69,8 @@ struct WeatherForecastContentView: View {
                             .padding([.trailing])
                         }
                         
-                    }.padding(.top, 80)
+                    }
+                    .padding(.top, 80)
                     
                     VStack(spacing: 4) {
                         Text((viewModel.weatherForecast?.location?.name.orEmpty).orEmpty)
@@ -77,24 +95,24 @@ struct WeatherForecastContentView: View {
                                         mediumSize: 16)
                         
                         HStack {
-                          HStack {
-
+                            HStack {
+                                
                                 ImageWithAssetName(imageName: AssetNames.WeatherView.windIcon,
                                                    width: 20,
                                                    height: 20)
-                               
-                              MediumTextLabel(mediumText: (viewModel.weatherForecast?.current?.windValue).orEmpty,
-                                              mediumSize: 12)
-                           }.padding(.trailing, 43)
-                           HStack {
-//
+                                
+                                MediumTextLabel(mediumText: (viewModel.weatherForecast?.current?.windValue).orEmpty,
+                                                mediumSize: 12)
+                            }.padding(.trailing, 43)
+                            HStack {
+                                //
                                 ImageWithAssetName(imageName: AssetNames.WeatherView.humidityIcon,
                                                    width: 20,
                                                    height: 20)
-//
-                               MediumTextLabel(mediumText: (viewModel.weatherForecast?.current?.humdityValue).orEmpty,
-                                               mediumSize: 12)
-                           }
+                                //
+                                MediumTextLabel(mediumText: (viewModel.weatherForecast?.current?.humdityValue).orEmpty,
+                                                mediumSize: 12)
+                            }
                         }
                     }
                     .padding([.horizontal, .vertical])
@@ -114,29 +132,24 @@ struct WeatherForecastContentView: View {
                     //.padding([ .bottom], 50)
                     Spacer()
                 }
-                VStack {
-                    SearchView(viewModel: SearchViewModel(),
-                               searchViewState: $searchViewState,
-                               selectedWeather: $selectedWeather)
-                    .hidden(searchViewState == .isClosed ? true : false)
-                    .frame( alignment: .top)
-                    Spacer()
-                }
-                .padding([ .top], UIDevice.current.hasNotch ? 0 : 65)
-            }.onChange(of: selectedWeather) { newValue in
-                viewModel.city = (newValue?.name).orEmpty
-                viewModel.getCurrentWeatherForecast()
             }
-        case .failed(let errorViewModel):
-            Color.clear.alert(isPresented: $viewModel.showErrorAlert) {
-                Alert(
-                    title: Text("Error"),
-                    message: Text(errorViewModel.message),
-                    dismissButton: .default(Text("OK"))
-                )
+            
+            VStack {
+                SearchView(viewModel: SearchViewModel(),
+                           searchViewState: $searchViewState,
+                           selectedWeather: $selectedWeather)
+                .hidden(searchViewState == .isClosed ? true : false)
+                .frame( alignment: .top)
+                Spacer()
             }
+            .padding([ .top], UIDevice.current.hasNotch ? 0 : 65)
         }
+        .onChange(of: selectedWeather) { newValue in
+            viewModel.getCurrentWeatherForecast(city: (newValue?.name).orEmpty)
+        }
+        
     }
+    
     func openSearchView() {
         searchViewState = .isOpened
     }
