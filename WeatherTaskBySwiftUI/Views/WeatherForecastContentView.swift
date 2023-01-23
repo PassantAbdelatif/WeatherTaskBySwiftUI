@@ -11,7 +11,6 @@ enum SearchViewState {
     case isOpened
     case isClosed
 }
-
 struct WeatherForecastContentView: View {
     
     @ObservedObject var viewModel: MainWeatherViewModel
@@ -31,7 +30,9 @@ struct WeatherForecastContentView: View {
                 switch state {
                 case .idle:
                     Color.clear.onAppear(perform: {
-                        viewModel.getCurrentWeatherForecast(city: "Alexandria")
+                        Task {
+                            await viewModel.getCurrentWeatherForecast(city: "Alexandria")
+                        }
                     })
                 case .loading:
                     VStack{
@@ -53,7 +54,7 @@ struct WeatherForecastContentView: View {
                 case .success:
                     
                     ZStack{
-                        
+             
                         HStack{
                             MediumTextLabel(mediumText: (viewModel.weatherForecast?.location?.localTimeFormatted.orEmpty).orEmpty,
                                             mediumSize: 16)
@@ -146,7 +147,9 @@ struct WeatherForecastContentView: View {
             .padding([ .top], UIDevice.current.hasNotch ? 0 : 65)
         }
         .onChange(of: selectedWeather) { newValue in
-            viewModel.getCurrentWeatherForecast(city: (newValue?.name).orEmpty)
+            Task {
+            await viewModel.getCurrentWeatherForecast(city: (newValue?.name).orEmpty)
+            }
         }
         
     }

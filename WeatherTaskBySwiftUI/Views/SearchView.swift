@@ -36,7 +36,9 @@ struct SearchView: View {
                 
                 TextField("search city",
                           text: $searchKeyWord.onChange({ (seachValue) in
-                    viewModel.getWeatherForecastSearchResults(searchKeyWord: seachValue)
+                    Task {
+                        await viewModel.getWeatherForecastSearchResults(searchKeyWord: seachValue)
+                    }
                     
                 }))
                 .modifier(ClearButton(text: $searchKeyWord))

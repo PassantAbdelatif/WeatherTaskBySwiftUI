@@ -7,9 +7,9 @@
 
 import Foundation
 import Combine
-import Moya
 import SwiftUI
 
+@MainActor
 class MainWeatherViewModel: ObservableObject {
     
     @Published private(set) var state: LoadingState = .idle
@@ -28,35 +28,26 @@ class MainWeatherViewModel: ObservableObject {
         self.networkService = weatherForecastService
     }
     
-    func getCurrentWeatherForecast(city: String) {
-        fetchweatherForecast(with: city)
+    func getCurrentWeatherForecast(city: String) async {
+      
+        await fetchweatherForecast(with: city)
+   
     }
     
 }
 
 extension MainWeatherViewModel {
-    func fetchweatherForecast(with cityName: String) {
+    func fetchweatherForecast(with cityName: String) async {
         state = .loading
         
-        let receiveCompletionHandler: (Subscribers.Completion<Error>) -> Void = { [weak self] completion in
-            switch completion {
-            case .failure(let error):
-                self?.showErrorAlert = true
-                self?.state = .failed(ErrorViewModel(message: error.localizedDescription))
-            case .finished:
-                self?.state = .success
-            }
+        do {
+           weatherForecast = try await networkService.fetchWeatherForecastResults(cityName: cityName)
+           setForecastDays()
+           state = .success
+        } catch(let error) {
+            showErrorAlert = true
+            state = .failed(ErrorViewModel(message: error.localizedDescription))
         }
-        
-        let valueHandler: (WeatherForecastResponse?) -> Void = { [weak self] weatherForecast in
-            self?.weatherForecast = weatherForecast
-            self?.setForecastDays()
-        }
-        
-        networkService
-            .fetchWeatherForecastResults(cityName: cityName)
-            .sink(receiveCompletion: receiveCompletionHandler, receiveValue: valueHandler)
-            .store(in: &bindings)
     }
     
     func setForecastDays() {

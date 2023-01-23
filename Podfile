@@ -6,17 +6,12 @@ target 'WeatherTaskBySwiftUI' do
   use_frameworks!
 
   # Pods for WeatherTaskBySwiftUI
-  pod 'Moya', '~> 15.0'
   pod 'SDWebImage', '~> 5.0'
-  pod 'Moya/Combine', '~> 15.0'
 
   target 'WeatherTaskBySwiftUITests' do
     inherit! :search_paths
     # Pods for testing
   end
 
-  target 'WeatherTaskBySwiftUIUITests' do
-    # Pods for testing
-  end
 
 end

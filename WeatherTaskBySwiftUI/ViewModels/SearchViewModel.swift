@@ -7,9 +7,8 @@
 
 import Foundation
 import Combine
-import Moya
 import SwiftUI
-
+@MainActor
 class SearchViewModel: ObservableObject {
     
     @Published private(set) var state: LoadingState = .idle
@@ -25,41 +24,29 @@ class SearchViewModel: ObservableObject {
         self.networkService = weatherForecastService
     }
     
-    func getWeatherForecastSearchResults(searchKeyWord: String) {
-        fetchweatherForecastSearchResults(with: searchKeyWord)
+    func getWeatherForecastSearchResults(searchKeyWord: String) async {
+        await fetchweatherForecastSearchResults(with: searchKeyWord)
     }
     
 }
 
 extension SearchViewModel {
-    func fetchweatherForecastSearchResults(with searchKeyWord: String) {
+    func fetchweatherForecastSearchResults(with searchKeyWord: String) async {
         state = .loading
         
-        let receiveCompletionHandler: (Subscribers.Completion<Error>) -> Void = { [weak self] completion in
-            switch completion {
-            case .failure(let error):
-                self?.showErrorAlert = true
-                self?.state = .failed(ErrorViewModel(message: error.localizedDescription))
-            case .finished:
-                self?.state = .success
-            }
-        }
-        
-        let valueHandler: ([WeatherAutoCompleteSearchResponse]?) -> Void = { [weak self] weatherForecastSearchResults in
-            if let weatherForecastSearchResults = weatherForecastSearchResults,
-               !weatherForecastSearchResults.isEmpty {
-                self?.showAutoCompleteView = true
-                self?.weatherForecastSearchResults = weatherForecastSearchResults
+        do {
+           let weatherForecastSearchResults = try await networkService.fetchWeatherAutoCompleteSearchResults(cityName: searchKeyWord)
+            if !weatherForecastSearchResults.isEmpty {
+                self.weatherForecastSearchResults = weatherForecastSearchResults
+                state = .success
+                showAutoCompleteView = true
             } else {
-                self?.showAutoCompleteView = false
+                showAutoCompleteView = false
             }
-            
+        } catch(let error) {
+            showErrorAlert = true
+            state = .failed(ErrorViewModel(message: error.localizedDescription))
         }
-        
-        networkService
-            .fetchWeatherAutoCompleteSearchResults(cityName: searchKeyWord)
-            .sink(receiveCompletion: receiveCompletionHandler, receiveValue: valueHandler)
-            .store(in: &bindings)
     }
     
 }
